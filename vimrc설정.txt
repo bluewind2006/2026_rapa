@@ -1,0 +1,126 @@
+1. vim 설치
+ sudo dnf install -y vim-enhanced
+
+2. 설치 후 확인
+vim --version | head
+- -+syntax, +folding, +clipboard 같은 옵션이 보여야 정상
+
+3.  alias 전용 파일 생성
+mkdir -p ~/.bashrc.d
+vi ~/.bashrc.d/aliases.sh
+
+-----------------------
+# User aliases
+alias vi='vim'
+-------------------------
+
+권한: chmod 644 ~/.bashrc.d/aliases.sh
+적용:  source ~/.bashrc
+확인: type vi
+
+
+3-1)  bashrc에 직접 설정 방법
+vi ~/.bashrc
+--------------------
+# User specific aliases and functions
+alias vi='vim'
+
+if [ -d ~/.bashrc.d ]; then
+        for rc in ~/.bashrc.d/*; do
+                if [ -f "$rc" ]; then
+                        . "$rc"
+                fi
+        done
+fi
+----------------
+
+적용: source ~/.bashrc
+
+4. vimrc 설정
+
+vi ~/.vimrc
+
+--------------------------------------
+" =========================================================
+" Vim 설정 
+" =========================================================
+
+" 기본 설정
+set nocompatible
+set encoding=utf-8
+set fileencodings=utf-8,euc-kr
+set hidden
+set backspace=indent,eol,start
+
+" UI / 가독성
+set number            " 줄 번호
+set ruler
+set showcmd
+set showmatch
+set cursorline        " 현재 줄 강조
+set nowrap
+set background=dark
+
+" 문법 / 파일 타입
+syntax on
+filetype plugin indent on
+
+" ---------------------------------------------------------
+" 검색 관련
+" ---------------------------------------------------------
+set hlsearch
+set incsearch
+set ignorecase
+set smartcase
+
+" ---------------------------------------------------------
+" YAML / Ansible 핵심: 들여쓰기 설정 (2 spaces 강제)
+" ---------------------------------------------------------
+set expandtab         " Tab → Space
+set tabstop=2
+set shiftwidth=2
+set softtabstop=2
+set autoindent
+set smartindent
+
+" YAML 파일에만 강제 적용
+autocmd FileType yaml setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
+" ---------------------------------------------------------
+" 들여쓰기 / 공백 시각화
+" ---------------------------------------------------------
+set list
+set listchars=tab:>>·,trail:·,space:·
+
+" 의미:
+"  - tab      : >>·
+"  - space    : ·
+"  - 줄끝공백 : ·
+"
+" YAML에서 공백 개수 즉시 확인 가능
+
+" ---------------------------------------------------------
+" 파일 타입 강제 인식
+" ---------------------------------------------------------
+autocmd BufNewFile,BufRead *.yml,*.yaml set filetype=yaml
+
+" ---------------------------------------------------------
+" 상태 확인용 (디버깅에 도움)
+" ---------------------------------------------------------
+set laststatus=2
+set wildmenu
+set wildmode=longest:full,full
+
+" ---------------------------------------------------------
+" 안전장치
+" ---------------------------------------------------------
+set noerrorbells
+set novisualbell
+set t_vb=
+
+" =========================================================
+" END
+" =========================================================
+
+
+---------------------------------------------------------------------------
