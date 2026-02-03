@@ -1,1 +1,50 @@
-readme
+# 3. postgresql on db
+- name: Install postgresql
+  hosts: db
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Install postgresql server
+      dnf:
+        name: postgresql-server
+        state: present
+
+    - name: Initialize postgresql database
+      command: postgresql-setup --initdb
+      args:
+        creates: /var/lib/pgsql/data/PG_VERSION
+
+    - name: Start and enable postgresql
+      service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Allow PostgreSQL port (5432) in firewalld
+      ansible.posix.firewalld:
+        port: 5432/tcp
+        permanent: true
+        state: enabled
+        immediate: true
+      when: ansible_facts.services['firewalld.service'] is defined
+
+    - name: Allow external access in postgresql.conf
+      lineinfile:
+        path: /var/lib/pgsql/data/postgresql.conf
+        regexp: "^#?listen_addresses"
+        line: "listen_addresses = '*'"
+      notify: restart postgresql
+
+    - name: Allow remote connections in pg_hba.conf
+      lineinfile:
+        path: /var/lib/pgsql/data/pg_hba.conf
+        line: "host    all    all    0.0.0.0/0    md5"
+        insertafter: EOF
+      notify: restart postgresql
+
+  handlers:
+    - name: restart postgresql
+      service:
+        name: postgresql
+        state: restarted
